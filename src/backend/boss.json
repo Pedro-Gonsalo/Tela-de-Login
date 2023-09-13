@@ -1,0 +1,12 @@
+{
+	"name": "backend",
+	"description": "",
+	"version": "1.0.0",
+	"homepage": "",
+	"mainsrc": "/src",
+	"projects": [],
+	"dependencies": {
+		"github.com/hashload/horse": "^3.1.1",
+		"https://github.com/hashload/horse-cors": "^1.0.6"
+	}
+}

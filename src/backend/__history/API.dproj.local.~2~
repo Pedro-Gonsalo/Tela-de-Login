@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2023/02/02 15:00:14.000.917,=C:\Users\Pedro Henrique\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2023/04/24 16:40:57.000.667,=C:\Users\Pedro Henrique\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2023/04/24 16:41:27.000.170,C:\Users\Pedro Henrique\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\Pedro Henrique\Desktop\backend\uAPI.pas</Transaction>
+    <Transaction>2023/04/24 16:41:27.000.170,C:\Users\Pedro Henrique\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\Pedro Henrique\Desktop\backend\uAPI.dfm</Transaction>
+    <Transaction>2023/04/24 16:41:30.000.423,C:\Users\Pedro Henrique\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\Pedro Henrique\Desktop\backend\API.dproj</Transaction>
+    <Transaction>2023/04/24 16:42:04.000.679,=C:\Users\Pedro Henrique\Desktop\backend\Unit1.pas</Transaction>
+    <Transaction>2023/04/24 16:42:20.000.877,C:\Users\Pedro Henrique\Desktop\backend\Unit1.pas=C:\Users\Pedro Henrique\Desktop\backend\uDataModule.pas</Transaction>
+    <Transaction>2023/04/24 16:42:20.000.877,C:\Users\Pedro Henrique\Desktop\backend\Unit1.dfm=C:\Users\Pedro Henrique\Desktop\backend\uDataModule.dfm</Transaction>
+  </Transactions>
+</BorlandProject>
