@@ -98,7 +98,8 @@ export default {
         },
       };
 
-      axios(config)
+      axios(
+      )
         .then((res) => {
           this.infosLogin = res.data;
 
