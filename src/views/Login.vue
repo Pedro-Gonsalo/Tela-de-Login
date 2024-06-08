@@ -93,6 +93,8 @@ export default {
         divLogin.removeAttribute("class");
         divLogin.style.borderRadius = "30px 0 0 30px";
       }
+
+      this.Login();
     }
   },
 
@@ -107,13 +109,16 @@ export default {
         },
       };
 
-      axios(
-      )
+      axios()
         .then((res) => {
           this.infosLogin = res.data;
 
+          console.log(this.infosLogin);
+
           if ((res.data.message = "acesso liberado")) {
-            this.login = true;
+            alert(res.data.message);
+
+            // this.login = true;
           }
         })
         .catch((error) => {
@@ -169,12 +174,6 @@ export default {
   animation-fill-mode: forwards;
   /* transition: all 0.8s ease; */
 }
-
-
-
-
-
-
 
 .container{
   background: #d3d3d3;
