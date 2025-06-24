@@ -1,0 +1,29 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  OnDestroy = DataModuleDestroy
+  Height = 287
+  Width = 475
+  object FDConnectionLogin: TFDConnection
+    Params.Strings = (
+      'User_Name=sa'
+      'Password=masterkey'
+      'Database=tela_login'
+      'SERVER=grv-not-97\mssqlserver01'
+      'OSAuthent=No'
+      'ApplicationName=Architect'
+      'Workstation=GRV-NOT-97'
+      'MARS=yes'
+      'DriverID=MSSQL')
+    Connected = True
+    Left = 56
+    Top = 16
+  end
+  object FDQueryUsers: TFDQuery
+    Connection = FDConnectionLogin
+    SQL.Strings = (
+      'select * from users')
+    Left = 56
+    Top = 80
+  end
+end
