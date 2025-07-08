@@ -21,3 +21,27 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Arquivos do Delphi
+*.dcu
+*.dsk
+*.local
+*.identcache
+*.stat
+*.~*
+*.bak
+*.tds
+*.exe
+*.dll
+*.rsm
+*.map
+
+# Pastas de build
+/Win32/
+/Win64/
+/Linux64/
+/__history/
+
+# Dependências (se aplicável)
+/packages/
+/lib/
