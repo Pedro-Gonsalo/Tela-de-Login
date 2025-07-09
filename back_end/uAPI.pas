@@ -141,14 +141,27 @@ end;
 
 procedure TForm1.ButtonIniciarClick(Sender: TObject);
 var
-   xDataBase : TDatabaseManager;
+  xDataBase: TDatabaseManager;
 begin
      xDataBase := TDatabaseManager.Create;
-     xDataBase.SetConnectionParams(EditNomeBanco.Text,
-                                   EditUsuario.Text,
-                                   EditSenha.Text,
-                                   EditHost.Text,
-                                   EditPorta.Text);
+
+     try
+        xDataBase.SetConnectionParams(
+          EditNomeBanco.Text,
+          EditUsuario.Text,
+          EditSenha.Text,
+          EditHost.Text,
+          EditPorta.Text
+        );
+
+        xDataBase.Initialize;
+        ButtonIniciar.Caption := 'Rodando';
+
+     except on E: Exception do
+         ShowMessage('Erro: ' + E.Message);
+     end;
+
+     xDataBase.Free;
 end;
 
 procedure TForm1.cadastro(req: THorseRequest; Res: THorseResponse);
@@ -412,7 +425,7 @@ var
   IniFile: TIniFile;
   FilePath: string;
 begin
-     FilePath := ExtractFilePath(ParamStr(0)) + 'database.ini';
+     FilePath := ExtractFilePath(ParamStr(0)) + 'config_database.ini';
 
      if FileExists(FilePath) then
      begin
