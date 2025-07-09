@@ -37,10 +37,10 @@ pnpm-debug.log*
 *.map
 
 # Pastas de build
-/Win32/
-/Win64/
-/Linux64/
-/__history/
+**/Win32/
+**/Win64/
+**/Linux64/
+**/_history/
 
 # Dependências (se aplicável)
 /packages/
