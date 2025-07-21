@@ -144,28 +144,30 @@ var
   Driver   : IDatabaseDriver;
   DataBase : TDatabaseManager;
 begin
-  Driver := TMssqlDriver.Create;
-  DataBase := TDatabaseManager.Create(Driver);
-
   try
-    // 3. Define os parâmetros
-    DataBase.SetConnectionParams(
-      EditNomeBanco.Text,
-      EditUsuario.Text,
-      EditSenha.Text,
-      EditHost.Text,
-      EditPorta.Text
-    );
+     try
+       Driver := TMssqlDriver.Create;
+       DataBase := TDatabaseManager.Create(Driver);
 
-    // 4. Garante que o banco existe (cria se necessário)
-    DataBase.Initialize;
+       // 3. Define os parâmetros
+       DataBase.SetConnectionParams(
+         EditNomeBanco.Text,
+         EditUsuario.Text,
+         EditSenha.Text,
+         EditHost.Text,
+         EditPorta.Text
+       );
 
-    ButtonIniciar.Caption := 'Rodando';
+       // 4. Garante que o banco existe (cria se necessário)
+       DataBase.Initialize;
+
+       ButtonIniciar.Caption := 'Rodando';
+     finally
+       DataBase.Free;
+     end;
   except on E: Exception do
       ShowMessage('Erro: ' + E.Message);
   end;
-
-  DataBase.Free;
 end;
 
 procedure TForm1.cadastro(req: THorseRequest; Res: THorseResponse);
