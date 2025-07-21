@@ -49,7 +49,7 @@ var
 implementation
 {$R *.dfm}
 
-uses uCreateDatabase;
+uses uCreateDatabase, uMssqlDriver;
 
 procedure TForm1.registry;
 begin
@@ -141,27 +141,31 @@ end;
 
 procedure TForm1.ButtonIniciarClick(Sender: TObject);
 var
-  xDataBase: TDatabaseManager;
+  Driver   : IDatabaseDriver;
+  DataBase : TDatabaseManager;
 begin
-     xDataBase := TDatabaseManager.Create;
+  Driver := TMssqlDriver.Create;
+  DataBase := TDatabaseManager.Create(Driver);
 
-     try
-        xDataBase.SetConnectionParams(
-          EditNomeBanco.Text,
-          EditUsuario.Text,
-          EditSenha.Text,
-          EditHost.Text,
-          EditPorta.Text
-        );
+  try
+    // 3. Define os parâmetros
+    DataBase.SetConnectionParams(
+      EditNomeBanco.Text,
+      EditUsuario.Text,
+      EditSenha.Text,
+      EditHost.Text,
+      EditPorta.Text
+    );
 
-        xDataBase.Initialize;
-        ButtonIniciar.Caption := 'Rodando';
+    // 4. Garante que o banco existe (cria se necessário)
+    DataBase.Initialize;
 
-     except on E: Exception do
-         ShowMessage('Erro: ' + E.Message);
-     end;
+    ButtonIniciar.Caption := 'Rodando';
+  except on E: Exception do
+      ShowMessage('Erro: ' + E.Message);
+  end;
 
-     xDataBase.Free;
+  DataBase.Free;
 end;
 
 procedure TForm1.cadastro(req: THorseRequest; Res: THorseResponse);

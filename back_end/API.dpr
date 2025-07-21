@@ -3,7 +3,9 @@ program API;
 uses
   Vcl.Forms,
   uAPI in 'uAPI.pas' {Form1},
-  uCreateDatabase in 'uCreateDatabase.pas';
+  uCreateDatabase in 'uCreateDatabase.pas',
+  uIniConfigStore in 'uIniConfigStore.pas',
+  uMssqlDriver in 'uMssqlDriver.pas';
 
 {$R *.res}
 
