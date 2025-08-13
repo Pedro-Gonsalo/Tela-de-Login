@@ -12,8 +12,10 @@ uses
 type
   IDatabaseDriver = interface
     ['{551CF5AF-6C08-470F-B94F-4A83E7EDA1F1}']
-    function  DatabaseExists(const P: TConnectionParams): Boolean;
-    procedure CreateDatabaseIfNotExists(const P: TConnectionParams);
+    function  DatabaseExists(const Params: TConnectionParams): Boolean;
+    procedure CreateDatabaseIfNotExists(const Params: TConnectionParams);
+    procedure CreateUsersTableIfNotExists(const Params: TConnectionParams);
+    procedure ConfigureConnection(const Params: TConnectionParams; NameDatabase: string);
   end;
 
 {==============================================================================}
@@ -82,8 +84,11 @@ procedure TDatabaseManager.Initialize;
 begin
   ValidateConnectionParams;
 
-  if not FDriver.DatabaseExists(FParams) then
+  if not FDriver.DatabaseExists(FParams) then  // Conecta no banco master do sql server para verificar se o banco existe
     FDriver.CreateDatabaseIfNotExists(FParams);
+
+  FDriver.ConfigureConnection(FParams, FParams.DatabaseName); // Conecta no banco da aplicação para criar as tabelas
+  FDriver.CreateUsersTableIfNotExists(FParams);
 end;
 
 end.
