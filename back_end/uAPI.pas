@@ -3,15 +3,12 @@ unit uAPI;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, FireDAC.Stan.Intf, FireDAC.Stan.Option,
-  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
-  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait,
-  Data.DB, FireDAC.Comp.Client,Vcl.Grids, Vcl.DBGrids, Horse, System.JSON,Horse.Cors,
-  Vcl.StdCtrls, System.IniFiles;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+  uIniConfigStore;
 
 type
-  TForm1 = class(TForm)
+  TFormMain = class(TForm)
     Label1: TLabel;
     EditNomeBanco: TEdit;
     LabelNomeBanco: TLabel;
@@ -27,426 +24,64 @@ type
     ButtonParar: TButton;
     procedure FormCreate(Sender: TObject);
     procedure ButtonIniciarClick(Sender: TObject);
-
   private
-    email: string;
-    password: string;
-    procedure login(req: THorseRequest; Res: THorseResponse);
-    procedure cadastro(req: THorseRequest; Res: THorseResponse);
-    procedure atualizarDados(req: THorseRequest; Res: THorseResponse);
-    procedure deletarUser(req: THorseRequest; Res: THorseResponse);
-    procedure ReadConfigFile;
-
+    FConnectionParams: TConnectionParams;
+    procedure LoadIniToUI;
+    procedure UpdateParamsFromUI;
   public
-
-    procedure registry;
-
-end;
+  end;
 
 var
-  Form1: TForm1;
+  FormMain: TFormMain;
 
 implementation
+
 {$R *.dfm}
 
-uses uCreateDatabase, uMssqlDriver;
+uses
+  uConfigProvider, uApp;
 
-procedure TForm1.registry;
+procedure TFormMain.FormCreate(Sender: TObject);
 begin
-     THorse.Post('/users/login', login);
-     THorse.Post('/users/cadastro', cadastro);
-     THorse.Post('/users/atualizar', atualizarDados);
-     THorse.Post('/users/deletar', deletarUser);
+  LoadIniToUI;
 end;
 
-procedure TForm1.login(req: THorseRequest; Res: THorseResponse);
+procedure TFormMain.LoadIniToUI;
 var
-     xQuery : TFDQuery;
-     xEmail,xSenha : String;
-     jsonRequest : TJSONValue;
-     JsonSend : TJSONObject;
+  ConfigProvider: IConfigProvider;
+  IniPath: string;
 begin
-     try
-//        try
-//            // Checando se o body não está vazio
-//            if req.Body.IsEmpty then
-//            begin
-//                 res.Send('erro').Status(THTTPStatus.BadRequest);
-//                 exit
-//            end;
-//
-//            jsonRequest := TJSONObject.ParseJSONValue(req.Body);
-//
-//            xEmail := EmptyStr;
-//            jsonRequest.TryGetValue('email',xEmail);
-//
-//            // Checando se o email não está vazio
-//            if xEmail.IsEmpty then
-//            begin
-//                  res.Send('Email vazio').Status(THTTPStatus.BadRequest);
-//                  exit;
-//            end;
-//
-//            xSenha := EmptyStr;
-//            jsonRequest.TryGetValue('password', xSenha);
-//
-//            // Checando se o email não está vazio
-//            if xSenha.IsEmpty then
-//            begin
-//                  res.Send('Senha vazia').Status(THTTPStatus.BadRequest);
-//                  exit;
-//            end;
-//
-//            xQuery := TFDQuery.Create(nil);
-//            xQuery.Connection := DataModule1.FDConnectionLogin;
-//            xQuery.SQL.Text := 'select * from users where email = :pEmail';
-//            xQuery.ParamByName('pEmail').AsString := xEmail;
-//            xQuery.Open;
-//
-//            if xQuery.RecordCount > 0 then
-//            begin
-//                 if xQuery.FieldByName('password').AsString.Equals(xSenha) then
-//                 begin
-//                      try
-//                         JsonSend := TJSONObject.Create();
-//                         JsonSend.AddPair('message','Acesso liberado');
-//                         JsonSend.AddPair('first_name',xQuery.fieldbyname('first_name').AsString);
-//                         JsonSend.AddPair('last_name',xQuery.fieldbyname('last_name').AsString);
-//                         JsonSend.AddPair('email',xQuery.fieldbyname('email').AsString);
-//                         JsonSend.AddPair('password',xQuery.fieldbyname('password').AsString);
-//                         res.Send(JsonSend.ToJSON).ContentType('application/json').Status(THTTPStatus.OK);
-//                      finally
-//                         if Assigned(JsonSend) then
-//                         begin
-//                              FreeAndNil(JsonSend);
-//                         end;
-//                      end;
-//                 end
-//                 else
-//                 begin
-//                      res.Send('Acesso negado, email e/ou senha incorretos').Status(THTTPStatus.Unauthorized);
-//                 end;
-//            end
-//            else // Caso a query esteja vazia
-//            begin
-//                 res.Send('Email não encontrado').Status(THTTPStatus.NoContent);
-//            end;
-//        except on E: Exception do
-//               res.Send(E.Message).Status(THTTPStatus.BadRequest);
-//        end;
-     finally
-          FreeAndNil(xQuery);
-     end;
+  IniPath := ExtractFilePath(ParamStr(0)) + 'config_database.ini';
+  ConfigProvider := TIniConfigProvider.Create(IniPath);
+  FConnectionParams := ConfigProvider.LoadConnectionParams;
+
+  EditNomeBanco.Text := FConnectionParams.DatabaseName;
+  EditUsuario.Text   := FConnectionParams.User;
+  EditSenha.Text     := FConnectionParams.Password;
+  EditHost.Text      := FConnectionParams.Host;
+  EditPorta.Text     := FConnectionParams.Port;
 end;
 
-procedure TForm1.ButtonIniciarClick(Sender: TObject);
-var
-  Driver   : IDatabaseDriver;
-  DataBase : TDatabaseManager;
+procedure TFormMain.UpdateParamsFromUI;
 begin
+  FConnectionParams.DatabaseName := EditNomeBanco.Text;
+  FConnectionParams.User         := EditUsuario.Text;
+  FConnectionParams.Password     := EditSenha.Text;
+  FConnectionParams.Host         := EditHost.Text;
+  FConnectionParams.Port         := EditPorta.Text;
+end;
+
+procedure TFormMain.ButtonIniciarClick(Sender: TObject);
+begin
+  UpdateParamsFromUI;
   try
-     try
-       Driver := TMssqlDriver.Create;
-       DataBase := TDatabaseManager.Create(Driver);
-
-       // 3. Define os parâmetros
-       DataBase.SetConnectionParams(
-         EditNomeBanco.Text,
-         EditUsuario.Text,
-         EditSenha.Text,
-         EditHost.Text,
-         EditPorta.Text
-       );
-
-       // 4. Garante que o banco existe (cria se necessário)
-       DataBase.Initialize;
-
-       ButtonIniciar.Caption := 'Rodando';
-     finally
-       DataBase.Free;
-     end;
-  except on E: Exception do
-      ShowMessage('Erro: ' + E.Message);
+    TApp.Start(FConnectionParams, 9000);
+    ButtonIniciar.Caption := 'Rodando';
+  except
+    on E: Exception do
+      ShowMessage('Erro ao iniciar: ' + E.Message);
   end;
 end;
 
-procedure TForm1.cadastro(req: THorseRequest; Res: THorseResponse);
-var
-     xQuery : TFDQuery;
-     xFirst_name,xLast_name, xEmail, xPassword : String;
-     jsonRequest : TJSONValue;
-begin
-     try
-//          try
-//              if req.Body.IsEmpty then
-//              begin
-//                   res.Send('erro').Status(THTTPStatus.BadRequest);
-//                   exit
-//              end;
-//
-//              jsonRequest := TJSONObject.ParseJSONValue(req.Body);
-//
-//              // Nome
-//              xFirst_name := EmptyStr;
-//              jsonRequest.TryGetValue('first_name',xFirst_name);
-//
-//              if xFirst_name.IsEmpty then
-//              begin
-//                   res.Send('Nome vazio').Status(THTTPStatus.BadRequest);
-//                   exit;
-//              end;
-//
-//              // Sobrenome
-//              xLast_name := EmptyStr;
-//              jsonRequest.TryGetValue('last_name',xLast_name);
-//
-//              if xLast_name.IsEmpty then
-//              begin
-//                   res.Send('Sobrenome vazio').Status(THTTPStatus.BadRequest);
-//                   exit;
-//              end;
-//
-//              // Email
-//              xEmail := EmptyStr;
-//              jsonRequest.TryGetValue('email',xEmail);
-//
-//              if xEmail.IsEmpty then
-//              begin
-//                   res.Send('Email vazio').Status(THTTPStatus.BadRequest);
-//                   exit;
-//              end;
-//
-//              // Senha
-//              xPassword := EmptyStr;
-//              jsonRequest.TryGetValue('password',xPassword);
-//
-//              if xPassword.IsEmpty then
-//              begin
-//                   res.Send('Senha vazia').Status(THTTPStatus.BadRequest);
-//                   exit;
-//              end;
-//
-//              // Inserindo os dados no banco
-//              xQuery := TFDQuery.Create(nil);
-//              xQuery.Connection := DataModule1.FDConnectionLogin;
-//              xQuery.SQL.Text := 'SELECT * FROM users WHERE email = :pEmail';
-//
-//              xQuery.ParamByName('pEmail').AsString := xEmail;
-//
-//              xQuery.Open;
-//
-//
-//              if xQuery.RecordCount > 0 then
-//              begin
-//                   Res.Send('Já existe um usuário com esse email, por favor use outro').Status(THTTPStatus.BadRequest);
-//              end
-//              else
-//              begin
-//                   // Inserindo os dados no banco
-//                   xQuery := TFDQuery.Create(nil);
-//                   xQuery.Connection := DataModule1.FDConnectionLogin;
-//                   xQuery.SQL.Text := 'INSERT INTO users (first_name, last_name, email, password,) VALUES ' +
-//                                       '(:pFirst_name, :pLast_name, :pEmail, :pPassword)';
-//
-//                   xQuery.ParamByName('pFirst_name').AsString := xFirst_name;
-//                   xQuery.ParamByName('pLast_name').AsString := xLast_name;
-//                   xQuery.ParamByName('pEmail').AsString := xEmail;
-//                   xQuery.ParamByName('pPassword').AsString := xPassword;
-//
-//                   xQuery.Execute;
-//
-//                   res.Send('Cadastro concluído com sucesso').Status(THTTPStatus.OK);
-//              end;
-//          except on E: Exception do
-//               res.Send(E.Message).Status(THTTPStatus.BadRequest);
-//          end;
-     finally
-          FreeAndNil(xQuery);
-     end;
-end;
-
-procedure TForm1.atualizarDados(req: THorseRequest; Res: THorseResponse);
-var
-     xQuery : TFDQuery;
-     xEmailWhere, xPasswordWhere, xFirst_name,xLast_name, xEmail, xPassword : String;
-     jsonRequest : TJSONValue;
-     JsonSend : TJSONObject;
-begin
-     try
-//          try
-//              if req.Body.IsEmpty then
-//              begin
-//                   res.Send('erro').Status(THTTPStatus.BadRequest);
-//                   exit
-//              end;
-//
-//              jsonRequest := TJSONObject.ParseJSONValue(req.Body);
-//
-//              // Nome
-//              xFirst_name := EmptyStr;
-//              jsonRequest.TryGetValue('first_name',xFirst_name);
-//
-//              if xFirst_name.IsEmpty then
-//              begin
-//                   res.Send('Nome vazio').Status(THTTPStatus.BadRequest);
-//              end;
-//
-//              // Sobrenome
-//              xLast_name := EmptyStr;
-//              jsonRequest.TryGetValue('last_name',xLast_name);
-//
-//              if xLast_name.IsEmpty then
-//              begin
-//                   res.Send('Sobrenome vazio').Status(THTTPStatus.BadRequest);
-//              end;
-//
-//              // Email
-//              xEmail := EmptyStr;
-//              jsonRequest.TryGetValue('email',xEmail);
-//
-//              if xEmail.IsEmpty then
-//              begin
-//                   res.Send('Email vazio').Status(THTTPStatus.BadRequest);
-//              end;
-//
-//              // Senha
-//              xPassword := EmptyStr;
-//              jsonRequest.TryGetValue('password',xPassword);
-//
-//              if xPassword.IsEmpty then
-//              begin
-//                   res.Send('Senha vazia').Status(THTTPStatus.BadRequest);
-//              end;
-//
-//              // Email do WHERE
-//              xEmailWhere := EmptyStr;
-//              jsonRequest.TryGetValue('emailWhere',xEmailWhere);
-//
-//              // Senha do WHERE
-//              xPasswordWhere := EmptyStr;
-//              jsonRequest.TryGetValue('passwordWhere',xPasswordWhere);
-//
-//              // Atualizando os dados no banco
-//              xQuery := TFDQuery.Create(nil);
-//              xQuery.Connection := DataModule1.FDConnectionLogin;
-//              xQuery.SQL.Text := 'UPDATE users ' +
-//                                 'SET first_name = :pFirst_name, last_name = :pLast_name, ' +
-//                                 'email = :pEmail, password = :pPassword ' +
-//                                 'WHERE email = :pEmailWhere and password = :pPasswordWhere';
-//
-//              xQuery.ParamByName('pFirst_name').AsString := xFirst_name;
-//              xQuery.ParamByName('pLast_name').AsString := xLast_name;
-//              xQuery.ParamByName('pEmail').AsString := xEmail;
-//              xQuery.ParamByName('pPassword').AsString := xPassword;
-//              xQuery.ParamByName('pEmailWhere').AsString := xEmailWhere;
-//              xQuery.ParamByName('pPasswordWhere').AsString := xPasswordWhere;
-//
-//              xQuery.Execute;
-//
-//              try
-//                  JsonSend := TJSONObject.Create();
-//                  JsonSend.AddPair('message','Dados atualizados com sucesso');
-//                  JsonSend.AddPair('first_name',xQuery.fieldbyname('first_name').AsString);
-//                  JsonSend.AddPair('last_name',xQuery.fieldbyname('last_name').AsString);
-//                  JsonSend.AddPair('email',xQuery.fieldbyname('email').AsString);
-//                  JsonSend.AddPair('password',xQuery.fieldbyname('password').AsString);
-//
-//                  res.Send(JsonSend.ToJSON).ContentType('application/json').Status(THTTPStatus.OK);
-//              finally
-//                  if Assigned(JsonSend) then
-//                  begin
-//                       FreeAndNil(JsonSend);
-//                  end;
-//              end;
-//
-//          except on E: Exception do
-//               res.Send(E.Message).Status(THTTPStatus.BadRequest);
-//          end;
-     finally
-          FreeAndNil(xQuery);
-     end;
-end;
-
-procedure TForm1.deletarUser(req: THorseRequest; Res: THorseResponse);
-var
-     xQuery : TFDQuery;
-     xEmail, xPassword : String;
-     jsonRequest : TJSONValue;
-begin
-     try
-//          try
-//              if req.Body.IsEmpty then
-//              begin
-//                   res.Send('erro').Status(THTTPStatus.BadRequest);
-//                   exit
-//              end;
-//
-//              jsonRequest := TJSONObject.ParseJSONValue(req.Body);
-//
-//              // Email
-//              xEmail := EmptyStr;
-//              jsonRequest.TryGetValue('email',xEmail);
-//
-//              if xEmail.IsEmpty then
-//              begin
-//                   res.Send('Email vazio').Status(THTTPStatus.BadRequest);
-//              end;
-//
-//              // Senha
-//              xPassword := EmptyStr;
-//              jsonRequest.TryGetValue('password',xPassword);
-//
-//              if xPassword.IsEmpty then
-//              begin
-//                   res.Send('Senha vazia').Status(THTTPStatus.BadRequest);
-//              end;
-//
-//              // Deletando user
-//              xQuery := TFDQuery.Create(nil);
-//              xQuery.Connection := DataModule1.FDConnectionLogin;
-//              xQuery.SQL.Text := 'DELETE FROM users WHERE email = :pEmail and password = :pPassword';
-//              xQuery.ParamByName('pEmail').AsString := xEmail;
-//              xQuery.ParamByName('pPassword').AsString := xPassword;
-//              xQuery.Execute;
-//
-//              res.Send('Usuário deletado com sucesso').Status(THTTPStatus.OK);
-//          except on E: Exception do
-//               res.Send(E.Message).Status(THTTPStatus.BadRequest);
-//          end;
-     finally
-          FreeAndNil(xQuery);
-     end;
-end;
-
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-     ReadConfigFile;
-     registry;
-     THorse.Use(Cors);
-     THorse.Listen(9000);
-end;
-
-procedure TForm1.ReadConfigFile;
-var
-  IniFile: TIniFile;
-  FilePath: string;
-begin
-     FilePath := ExtractFilePath(ParamStr(0)) + 'config_database.ini';
-
-     if FileExists(FilePath) then
-     begin
-          IniFile := TIniFile.Create(FilePath);
-
-          try
-             EditNomeBanco.Text := IniFile.ReadString('database', 'dbname', EmptyStr);
-             EditUsuario.Text := IniFile.ReadString('database', 'user', EmptyStr);
-             EditSenha.Text := IniFile.ReadString('database', 'password', EmptyStr);
-             EditHost.Text := IniFile.ReadString('database', 'host', EmptyStr);
-             EditPorta.Text := IniFile.ReadString('database', 'port', EmptyStr);
-          finally
-             IniFile.Free;
-          end;
-     end;
-end;
-
 end.
+

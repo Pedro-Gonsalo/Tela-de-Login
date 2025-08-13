@@ -2,6 +2,8 @@ program API;
 
 uses
   Vcl.Forms,
+  FireDAC.UI.Intf,
+  FireDAC.VCLUI.Wait,
   uAPI in 'uAPI.pas' {Form1},
   uCreateDatabase in 'uCreateDatabase.pas',
   uIniConfigStore in 'uIniConfigStore.pas',
@@ -15,6 +17,6 @@ begin
 //  ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
 
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TFormMain, FormMain);
   Application.Run;
 end.

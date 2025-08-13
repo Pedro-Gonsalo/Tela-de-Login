@@ -1,7 +1,7 @@
-object Form1: TForm1
+object FormMain: TFormMain
   Left = 0
   Top = 0
-  Caption = 'Form1'
+  Caption = 'FormMain'
   ClientHeight = 259
   ClientWidth = 570
   Color = clBtnFace
@@ -12,7 +12,6 @@ object Form1: TForm1
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  PrintScale = poPrintToFit
   OnCreate = FormCreate
   DesignSize = (
     570
@@ -80,6 +79,7 @@ object Form1: TForm1
     Top = 56
     Width = 121
     Height = 21
+    PasswordChar = '*'
     TabOrder = 2
   end
   object EditHost: TEdit
