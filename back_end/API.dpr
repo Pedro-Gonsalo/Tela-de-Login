@@ -7,7 +7,13 @@ uses
   uAPI in 'uAPI.pas' {Form1},
   uCreateDatabase in 'uCreateDatabase.pas',
   uIniConfigStore in 'uIniConfigStore.pas',
-  uMssqlDriver in 'uMssqlDriver.pas';
+  uMssqlDriver in 'uMssqlDriver.pas',
+  uConfigProvider in 'uConfigProvider.pas',
+  uConnectionFactory in 'uConnectionFactory.pas',
+  uUserController in 'uUserController.pas',
+  uUserRepository in 'uUserRepository.pas',
+  uUserService in 'uUserService.pas',
+  uApp in 'uApp.pas';
 
 {$R *.res}
 
