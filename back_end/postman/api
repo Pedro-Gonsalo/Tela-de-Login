@@ -1,0 +1,162 @@
+{
+	"info": {
+		"_postman_id": "4814e32a-f1b5-43a8-80bd-ba96972fb8da",
+		"name": "Tela login",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25030199"
+	},
+	"item": [
+		{
+			"name": "Fazer login",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"carlosdias@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/users/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar usuário",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"first_name\": \"Carlos\",\r\n    \"last_name\": \"Dias\",\r\n    \"email\": \"carlosdias@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/users/cadastro",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"cadastro"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deletar usuário",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"carlosdias@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/users/deletar",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"deletar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Atualizar usuário",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"first_name\": \"Carlos\",\r\n    \"last_name\": \"Dias\",\r\n    \"email\": \"carlosdias@gmail.com\",\r\n    \"password\": \"123456\",\r\n    // where da query de update\r\n    \"email_where\": \"carlosdias@gmail.com\",\r\n    \"password_where\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/users/atualizar",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"atualizar"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "localhost:9000",
+			"type": "string"
+		}
+	]
+}
