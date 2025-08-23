@@ -26,7 +26,7 @@ begin
   FService := Service;
 end;
 
-function TUserController.JsonGetString(const JsonObject: TJSONObject; const Key: string; const DefaultValue: string = ''): string;
+function TUserController.JsonGetString(const JsonObject: TJSONObject; const Key: string; const DefaultValue: string): string;
 var
   JsonValue: TJSONValue;
 begin
@@ -47,139 +47,174 @@ end;
 
 procedure TUserController.RegisterRoutes;
 begin
-  THorse.Post('/users/login',
+  // LOGIN
+  THorse.Get('/users/login',
     procedure(Request: THorseRequest; Response: THorseResponse)
     var
       RequestBody: TJSONObject;
       EmailAddress, PasswordValue: string;
       AuthenticatedUser: TUserRecord;
     begin
-      if Request.Body.IsEmpty then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
-        Exit;
-      end;
-
-      RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
-      if not Assigned(RequestBody) then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
-        Exit;
-      end;
-
       try
-        EmailAddress  := JsonGetString(RequestBody, 'email', '');
-        PasswordValue := JsonGetString(RequestBody, 'password', '');
-
-        if (EmailAddress = '') or (PasswordValue = '') then
+        if Request.Body.IsEmpty then
         begin
-          Response.Status(THTTPStatus.BadRequest).Send('Email e senha obrigatórios');
+          Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
           Exit;
         end;
 
-        if FService.Login(EmailAddress, PasswordValue, AuthenticatedUser) then
-          Response.Status(THTTPStatus.OK)
-                  .Send(TJSONObject.Create
-                        .AddPair('message','Acesso liberado')
-                        .AddPair('first_name', AuthenticatedUser.FirstName)
-                        .AddPair('last_name' , AuthenticatedUser.LastName)
-                        .AddPair('email'     , AuthenticatedUser.Email))
-        else
-          Response.Status(THTTPStatus.Unauthorized).Send('Acesso negado');
-      finally
-        RequestBody.Free;
+        RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
+        if not Assigned(RequestBody) then
+        begin
+          Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
+          Exit;
+        end;
+
+        try
+          EmailAddress  := JsonGetString(RequestBody, 'email', '');
+          PasswordValue := JsonGetString(RequestBody, 'password', '');
+
+          if (EmailAddress = '') or (PasswordValue = '') then
+          begin
+            Response.Status(THTTPStatus.BadRequest).Send('Email e senha obrigatórios');
+            Exit;
+          end;
+
+          if FService.Login(EmailAddress, PasswordValue, AuthenticatedUser) then
+            Response
+              .Status(THTTPStatus.OK)
+              .Send(
+                TJSONObject.Create
+                  .AddPair('message', 'Acesso liberado')
+                  .AddPair('first_name', AuthenticatedUser.FirstName)
+                  .AddPair('last_name',  AuthenticatedUser.LastName)
+                  .AddPair('email',      AuthenticatedUser.Email)
+              )
+          else
+            Response.Status(THTTPStatus.Unauthorized).Send('Acesso negado');
+        finally
+          RequestBody.Free;
+        end;
+      except
+        on E: Exception do
+        begin
+          // Não re-raise! Converte para resposta HTTP
+          Response.Status(THTTPStatus.BadRequest).Send(E.Message);
+        end;
       end;
     end);
 
+  // CADASTRO
   THorse.Post('/users/cadastro',
     procedure(Request: THorseRequest; Response: THorseResponse)
     var
       RequestBody: TJSONObject;
       NewUser: TUserRecord;
     begin
-      if Request.Body.IsEmpty then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
-        Exit;
-      end;
-
-      RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
-      if not Assigned(RequestBody) then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
-        Exit;
-      end;
-
       try
-        NewUser := JsonToUser(RequestBody);
-        FService.RegisterUser(NewUser);
-        Response.Status(THTTPStatus.OK).Send('Cadastro concluído');
-      finally
-        RequestBody.Free;
+        if Request.Body.IsEmpty then
+        begin
+          Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
+          Exit;
+        end;
+
+        RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
+        if not Assigned(RequestBody) then
+        begin
+          Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
+          Exit;
+        end;
+
+        try
+          NewUser := JsonToUser(RequestBody);
+          FService.RegisterUser(NewUser);
+          Response.Status(THTTPStatus.OK).Send('Cadastro concluído');
+        finally
+          RequestBody.Free;
+        end;
+      except
+        on E: Exception do
+        begin
+          // Se quiser diferenciar conflitos (email já existe), use 409:
+          // Response.Status(THTTPStatus.Conflict).Send(E.Message);
+          Response.Status(THTTPStatus.BadRequest).Send(E.Message);
+        end;
       end;
     end);
 
-  THorse.Post('/users/atualizar',
+  // ATUALIZAR
+  THorse.Put('/users/atualizar',
     procedure(Request: THorseRequest; Response: THorseResponse)
     var
       RequestBody: TJSONObject;
       WhereEmail, WherePassword: string;
       NewUser: TUserRecord;
     begin
-      if Request.Body.IsEmpty then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
-        Exit;
-      end;
-
-      RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
-      if not Assigned(RequestBody) then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
-        Exit;
-      end;
-
       try
-        WhereEmail    := JsonGetString(RequestBody, 'emailWhere', '');
-        WherePassword := JsonGetString(RequestBody, 'passwordWhere', '');
-        NewUser       := JsonToUser(RequestBody);
+        if Request.Body.IsEmpty then
+        begin
+          Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
+          Exit;
+        end;
 
-        FService.UpdateUser(WhereEmail, WherePassword, NewUser);
-        Response.Status(THTTPStatus.OK).Send('Dados atualizados');
-      finally
-        RequestBody.Free;
+        RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
+        if not Assigned(RequestBody) then
+        begin
+          Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
+          Exit;
+        end;
+
+        try
+          WhereEmail    := JsonGetString(RequestBody, 'email_where', '');
+          WherePassword := JsonGetString(RequestBody, 'password_where', '');
+          NewUser       := JsonToUser(RequestBody);
+
+          FService.UpdateUser(WhereEmail, WherePassword, NewUser);
+          Response.Status(THTTPStatus.OK).Send('Dados atualizados');
+        finally
+          RequestBody.Free;
+        end;
+      except
+        on E: Exception do
+          Response.Status(THTTPStatus.BadRequest).Send(E.Message);
       end;
     end);
 
-  THorse.Post('/users/deletar',
+  // DELETAR
+  THorse.Delete('/users/deletar',
     procedure(Request: THorseRequest; Response: THorseResponse)
     var
       RequestBody: TJSONObject;
       EmailAddress, PasswordValue: string;
     begin
-      if Request.Body.IsEmpty then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
-        Exit;
-      end;
-
-      RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
-      if not Assigned(RequestBody) then
-      begin
-        Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
-        Exit;
-      end;
-
       try
-        EmailAddress  := JsonGetString(RequestBody, 'email', '');
-        PasswordValue := JsonGetString(RequestBody, 'password', '');
-        FService.DeleteUser(EmailAddress, PasswordValue);
-        Response.Status(THTTPStatus.OK).Send('Usuário deletado');
-      finally
-        RequestBody.Free;
+        if Request.Body.IsEmpty then
+        begin
+          Response.Status(THTTPStatus.BadRequest).Send('Body vazio');
+          Exit;
+        end;
+
+        RequestBody := TJSONObject.ParseJSONValue(Request.Body) as TJSONObject;
+        if not Assigned(RequestBody) then
+        begin
+          Response.Status(THTTPStatus.BadRequest).Send('JSON inválido');
+          Exit;
+        end;
+
+        try
+          EmailAddress  := JsonGetString(RequestBody, 'email', '');
+          PasswordValue := JsonGetString(RequestBody, 'password', '');
+          FService.DeleteUser(EmailAddress, PasswordValue);
+          Response.Status(THTTPStatus.OK).Send('Usuário deletado');
+        finally
+          RequestBody.Free;
+        end;
+      except
+        on E: Exception do
+          Response.Status(THTTPStatus.BadRequest).Send(E.Message);
       end;
     end);
 end;
 
 end.
+
 
